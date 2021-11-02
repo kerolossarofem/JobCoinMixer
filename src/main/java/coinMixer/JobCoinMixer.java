@@ -24,15 +24,15 @@ public class JobCoinMixer {
 		System.out.println("A 1.5% fee will be taken out");
 
 		// Step 3: then checks to see if deposit has occurred
-//		String balance = getDepositInfo(depositAddress);
-//		System.out.println("Your deposit was a success!");
+		String balance = getDepositInfo(depositAddress);
+		System.out.println("Your deposit was a success!");
 
 		// Step 4: deposit is moved to house_account after 3-10 seconds
-		postValue(depositAddress, house_account, "40.4");
+		postValue(depositAddress, house_account, balance);
 
 		// Step 5: Different incrememnts of the balance is moved from the house account
 		// to three different adddresses provided by the user
-		distributeFunds("40.4", addresses);
+		distributeFunds(balance, addresses);
 
 	}
 
