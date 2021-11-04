@@ -9,5 +9,6 @@ package coinMixer.service;
  */
 public interface JobMixerService {
 	String getDeposit(String depositAddress) throws Exception;
-	void postValue(String from, String to, String balance) throws Exception;
+
+	void sendCoin(String from, String to, String balance) throws Exception;
 }
