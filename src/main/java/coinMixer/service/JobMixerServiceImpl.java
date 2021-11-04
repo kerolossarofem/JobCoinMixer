@@ -5,12 +5,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,8 +14,8 @@ import coinMixer.model.AddressBalance;
 
 public class JobMixerServiceImpl implements JobMixerService {
 
-	private static final String GET_DEPOSIT_URL = "http://jobcoin.gemini.com/negative/api/addresses/";
-	private static final String POST_VALUE_URL = "http://jobcoin.gemini.com/negative/api/transactions/";
+	private static final String GET_DEPOSIT_URL = "http://jobcoin.gemini.com/herbs-vagrancy/api/addresses/";
+	private static final String POST_VALUE_URL = "http://jobcoin.gemini.com/herbs-vagrancy/api/transactions";
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -41,33 +37,37 @@ public class JobMixerServiceImpl implements JobMixerService {
 	}
 
 	@Override
-	public void postValue(String from, String to, String balance) throws Exception {
-		URL post_url = new URL(POST_VALUE_URL);
-		URLConnection con = post_url.openConnection();
-		HttpURLConnection http = (HttpURLConnection) con;
-		http.setRequestMethod("POST"); // PUT is another valid option
-		http.setDoOutput(true);
+	public void sendCoin(String from, String to, String amount) throws Exception {
+		HashMap<String, String> values = new HashMap<>();
 
-		Map<String, String> arguments = new HashMap<>();
-		arguments.put("fromAddress", from);// deposit add
-		arguments.put("toAddress", to); // house account
-		arguments.put("amount", balance);// amount
-		StringJoiner sj = new StringJoiner("&");
-		for (Map.Entry<String, String> entry : arguments.entrySet())
-			sj.add(URLEncoder.encode(entry.getKey(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue(), "UTF-8"));
-		byte[] out = sj.toString().getBytes(StandardCharsets.UTF_8);
-		int length = out.length;
+		values.put("fromAddress", from);
+		values.put("toAddress", to);
+		values.put("amount", amount);
 
-		http.setFixedLengthStreamingMode(length);
-		http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-		http.connect();
+		String requestBody = objectMapper.writeValueAsString(values);
 
-		try (OutputStream os = http.getOutputStream()) {
-			os.write(out);
+		System.out.println(requestBody);
+		URL obj = new URL(POST_VALUE_URL);
+		HttpURLConnection postConnection = (HttpURLConnection) obj.openConnection();
+		postConnection.setRequestMethod("POST");
+		postConnection.setRequestProperty("Content-Type", "application/json");
+
+		postConnection.setDoOutput(true);
+		OutputStream os = postConnection.getOutputStream();
+		os.write(requestBody.getBytes());
+		os.flush();
+		os.close();
+		int responseCode = postConnection.getResponseCode();
+
+		if (responseCode == 422) {
+			System.out
+					.println("ERROR: Insufficient Funds from[" + from + "], to[" + to + "] with amout[" + amount + "]");
+		} else if (responseCode != HttpURLConnection.HTTP_OK) {
+			System.out.println("ERROR: in send coin from[" + from + "], to[" + to + "] with amout[" + amount + "]");
+		} else {
+			System.out.println("coin has been sent!");
 		}
-		
+
 	}
 
-	
-	
 }
