@@ -18,10 +18,9 @@ public class JobCoinMixer extends Thread {
 		List<String> addresses = userAddresses();
 
 		// Step 2: System chooses a deposit address
-		String depositAddress = chooseDepositAddress();// generate address
-		System.out.println("Please deposit your jobcoins to the following address: " + depositAddress);
-		System.out.println("A 1.5% fee will be taken out");
-
+		String depositAddress = getDepositAddr();// generate address
+		System.out.println("Please deposit your coins this address: " + depositAddress);
+		System.out.println("A fee of 1.5% will be deducted");
 		// run step 3-5 into a different thread.
 		new Thread(() -> { // Lambda Expression
 			try {
@@ -34,7 +33,8 @@ public class JobCoinMixer extends Thread {
 				System.out.println("Your deposit was moved to house account!");
 
 				// Step 5: Different increments of the balance is moved from the house account
-				distributeFunds(balance, addresses);
+				distribute(balance, addresses);
+				System.out.println("Your deposit was distributed to your addresses!");
 			} catch (Exception e) {
 				System.out.println("ERROR: " + e);
 			}
@@ -58,7 +58,7 @@ public class JobCoinMixer extends Thread {
 	}
 
 //chooseDepositAddress() chooses a random address from a list of possible deposit addresses
-	private static String chooseDepositAddress() {
+	private static String getDepositAddr() {
 		// randamly generated
 		return UUID.randomUUID().toString();
 	}
@@ -76,7 +76,7 @@ public class JobCoinMixer extends Thread {
 
 	// takes fees and breaks the deposit into small deposits and sends the
 	// parameters to sendcoin
-	public static void distributeFunds(String balance, List<String> addresses) throws Exception {
+	public static void distribute(String balance, List<String> addresses) throws Exception {
 		// double currBalance = (Integer.parseInt(balance)) * 1.0;
 		BigDecimal currBalance = new BigDecimal(balance);
 		currBalance = currBalance.subtract(currBalance.multiply(FEE));
